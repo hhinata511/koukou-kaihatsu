@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>🔬 動作解析</h2>
+
+    <div class="card">
+        <h3>{{ record.record_date.strftime('%Y年%m月%d日') }} - {{ record.menu_name }}</h3>
+        <p>日次疲労スコア: {{ record.daily_fatigue_score }}</p>
+    </div>
+
+    {% if videos %}
+        <div class="card">
+            <h3>アップロード済み動画</h3>
+            {% for v in videos %}
+            <div class="video-item">
+                <div class="video-info">
+                    <strong>{{ v.video_type }}</strong>
+                    <p>ファイル: {{ v.file_path }}</p>
+                    <p>解析状態: <span class="status-badge status-{{ v.analysis_status }}">{{ v.analysis_status }}</span></p>
+                </div>
+                <div class="video-preview">
+                    <video controls width="100%">
+                        <source src="{{ url_for('static', filename=v.file_path) }}" type="video/mp4">
+                        お使いのブラウザは動画再生に対応していません。
+                    </video>
+                </div>
+
+                {% if v.analysis_status == '解析済み' and v.analysis_result_json %}
+                <div class="analysis-result">
+                    <h4>解析結果</h4>
+                    <pre>{{ v.analysis_result_json }}</pre>
+                </div>
+                {% elif v.analysis_status == '未解析' %}
+                <p class="muted">この動画はまだ解析されていません。走行解析機能は今後のアップデートで追加予定です。</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <h3>動画</h3>
+            <p>アップロードされた動画はありません。記録詳細画面から動画をアップロードしてください。</p>
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <h3>動作解析について</h3>
+        <p>本システムでは将来的に以下の指標を動画から自動抽出する予定です：</p>
+        <ul>
+            <li>ストライド</li>
+            <li>ピッチ</li>
+            <li>股関節角度</li>
+            <li>膝関節角度</li>
+            <li>接地時間</li>
+            <li>骨盤の上下動</li>
+        </ul>
+        <p class="muted">※ MVP（現在のバージョン）では動画アップロードのみ対応しており、自動解析は未実装です。</p>
+    </div>
+
+    <div class="form-actions">
+        <a href="{{ url_for('records.record_detail', record_id=record.id) }}" class="btn-secondary">記録詳細に戻る</a>
+        <a href="{{ url_for('main.index') }}" class="btn-secondary">トップに戻る</a>
+    </div>
+</div>
+{% endblock %}

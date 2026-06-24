@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>📝 記録入力</h2>
+
+    <form method="POST" action="{{ url_for('records.record_new') }}" class="record-form">
+        <div class="form-group">
+            <label for="record_date">日付 <span class="required">*</span></label>
+            <input type="date" id="record_date" name="record_date"
+                   value="{{ form_data.record_date if form_data else today.strftime('%Y-%m-%d') }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="menu_name">練習メニュー <span class="required">*</span></label>
+            <select id="menu_name" name="menu_name" required>
+                <option value="">選択してください</option>
+                {% for menu, score in menu_list.items() %}
+                    <option value="{{ menu }}" {% if form_data and form_data.menu_name == menu %}selected{% endif %}>
+                        {{ menu }} (基礎点: {{ score }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="menu_count">本数</label>
+            <input type="number" id="menu_count" name="menu_count"
+                   value="{{ form_data.menu_count if form_data else '1' }}" min="0" step="1">
+        </div>
+
+        <div class="form-group">
+            <label for="sleep_hours">睡眠時間（時間）</label>
+            <input type="number" id="sleep_hours" name="sleep_hours"
+                   value="{{ form_data.sleep_hours if form_data else '7.5' }}"
+                   min="0" max="24" step="0.1" placeholder="例: 7.5">
+        </div>
+
+        <div class="form-group">
+            <label for="subjective_fatigue">主観的疲労度</label>
+            <div class="radio-group">
+                {% for i in range(1, 6) %}
+                <label class="radio-label">
+                    <input type="radio" name="subjective_fatigue" value="{{ i }}"
+                           {% if (form_data and form_data.subjective_fatigue|int == i) or (not form_data and i == 3) %}checked{% endif %}>
+                    <span>{{ i }}</span>
+                    <small>
+                        {% if i == 1 %}全く疲れていない
+                        {% elif i == 2 %}少し疲れている
+                        {% elif i == 3 %}普通
+                        {% elif i == 4 %}疲れている
+                        {% else %}かなり疲れている{% endif %}
+                    </small>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="temperature">気温（℃）</label>
+            <input type="number" id="temperature" name="temperature"
+                   value="{{ form_data.temperature if form_data else '20' }}" step="0.1">
+        </div>
+
+        <div class="form-group">
+            <label for="remark">備考</label>
+            <textarea id="remark" name="remark" rows="3" placeholder="自由記入">{{ form_data.remark if form_data else '' }}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">保存する</button>
+            <a href="{{ url_for('main.index') }}" class="btn-secondary">キャンセル</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

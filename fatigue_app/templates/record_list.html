@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>📋 記録一覧</h2>
+
+    {% if records %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>日付</th>
+                    <th>練習メニュー</th>
+                    <th>本数</th>
+                    <th>睡眠</th>
+                    <th>疲労度</th>
+                    <th>気温</th>
+                    <th>日次スコア</th>
+                    <th>詳細</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td>{{ r.record_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ r.menu_name }}</td>
+                    <td>{{ r.menu_count }}</td>
+                    <td>{{ r.sleep_hours }}h</td>
+                    <td>{{ r.subjective_fatigue }}/5</td>
+                    <td>{{ r.temperature }}℃</td>
+                    <td>{{ r.daily_fatigue_score }}</td>
+                    <td><a href="{{ url_for('records.record_detail', record_id=r.id) }}" class="btn-small">詳細</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-state">
+            <p>まだ記録がありません。</p>
+            <a href="{{ url_for('records.record_new') }}" class="btn-primary">記録を入力する</a>
+        </div>
+    {% endif %}
+
+    <div class="form-actions">
+        <a href="{{ url_for('records.record_new') }}" class="btn-primary">新規記録入力</a>
+        <a href="{{ url_for('main.index') }}" class="btn-secondary">トップに戻る</a>
+    </div>
+</div>
+{% endblock %}

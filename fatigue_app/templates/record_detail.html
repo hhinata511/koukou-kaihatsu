@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>📋 記録詳細</h2>
+
+    <div class="card">
+        <div class="detail-header">
+            <div>
+                <h3>{{ record.record_date.strftime('%Y年%m月%d日') }}</h3>
+                <p>{{ record.menu_name }} ×{{ record.menu_count }}本</p>
+            </div>
+            <div class="detail-score">
+                <span class="score-label">日次疲労スコア</span>
+                <span class="score-value">{{ record.daily_fatigue_score }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-row">
+        <div class="card">
+            <h3>週間スコア</h3>
+            <div class="score-value">{{ weekly_score }}</div>
+        </div>
+        <div class="card risk-card {{ risk_style }}">
+            <h3>リスク判定</h3>
+            <div class="risk-level">{{ risk_level }}</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>スコア内訳</h3>
+        <table class="score-table">
+            <thead>
+                <tr>
+                    <th>項目</th>
+                    <th>入力値</th>
+                    <th>スコア</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>練習強度</td>
+                    <td>{{ record.menu_name }} ×{{ record.menu_count }}本</td>
+                    <td>{{ record.training_score }}</td>
+                </tr>
+                <tr>
+                    <td>睡眠スコア</td>
+                    <td>{{ record.sleep_hours }}時間 （平均: {{ user.average_sleep if user else '7.5' }}時間）</td>
+                    <td>{{ record.sleep_score }}</td>
+                </tr>
+                <tr>
+                    <td>主観的疲労度</td>
+                    <td>{{ record.subjective_fatigue }} / 5</td>
+                    <td>{{ record.fatigue_score_self }}</td>
+                </tr>
+                <tr>
+                    <td>気温スコア</td>
+                    <td>{{ record.temperature }}℃</td>
+                    <td>{{ record.temperature_score }}</td>
+                </tr>
+                <tr>
+                    <td>走行スコア</td>
+                    <td>-</td>
+                    <td>{{ record.running_score }} (未実装)</td>
+                </tr>
+                <tr class="total-row">
+                    <td><strong>合計</strong></td>
+                    <td></td>
+                    <td><strong>{{ record.daily_fatigue_score }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% if record.remark %}
+    <div class="card">
+        <h3>備考</h3>
+        <p>{{ record.remark }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Video Upload Section -->
+    <div class="card">
+        <h3>動画アップロード</h3>
+        <form method="POST" action="{{ url_for('analysis.video_upload') }}" enctype="multipart/form-data" class="inline-form">
+            <input type="hidden" name="record_id" value="{{ record.id }}">
+            <div class="form-group">
+                <label for="video_type">動画タイプ</label>
+                <select id="video_type" name="video_type">
+                    <option value="running">走行映像</option>
+                    <option value="jump">垂直ジャンプ</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="video_file">動画ファイル</label>
+                <input type="file" id="video_file" name="video_file" accept=".mp4,.mov,.avi,.webm,.mkv">
+            </div>
+            <button type="submit" class="btn-primary">アップロード</button>
+        </form>
+
+        {% if record.videos %}
+        <h4>アップロード済み動画</h4>
+        <ul class="video-list">
+            {% for v in record.videos %}
+            <li>
+                <span>{{ v.video_type }} - {{ v.file_path }}</span>
+                <span class="status-badge status-{{ v.analysis_status }}">{{ v.analysis_status }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    <div class="form-actions">
+        <a href="{{ url_for('main.index') }}" class="btn-secondary">トップに戻る</a>
+        <a href="{{ url_for('records.record_list') }}" class="btn-secondary">一覧に戻る</a>
+    </div>
+</div>
+{% endblock %}

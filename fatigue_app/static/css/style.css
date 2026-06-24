@@ -1,0 +1,459 @@
+/* ========================================
+   疲労管理支援システム - スタイルシート
+   ======================================== */
+
+/* ---------- Reset & Base ---------- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+    padding: 20px;
+}
+
+/* ---------- Container ---------- */
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* ---------- Header ---------- */
+header {
+    background: linear-gradient(135deg, #1a73e8, #1557b0);
+    color: white;
+    padding: 0 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.header-container {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 56px;
+    flex-wrap: wrap;
+}
+
+header h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+nav a {
+    color: rgba(255,255,255,0.9);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+nav a:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+/* ---------- Footer ---------- */
+footer {
+    background: #f8f9fa;
+    text-align: center;
+    padding: 12px;
+    font-size: 0.8rem;
+    color: #888;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* ---------- Cards ---------- */
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.card-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.card h3 {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+.card h4 {
+    font-size: 0.95rem;
+    margin: 14px 0 8px;
+}
+
+.card-sub {
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 4px;
+}
+
+/* ---------- Score Display ---------- */
+.score-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a73e8;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.score-value.muted {
+    color: #bbb;
+}
+
+.score-label {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.detail-score {
+    text-align: right;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ---------- Risk Display ---------- */
+.risk-level {
+    font-size: 2.2rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.risk-safe {
+    border-left: 4px solid #34a853;
+}
+.risk-safe .risk-level {
+    color: #34a853;
+}
+
+.risk-warning {
+    border-left: 4px solid #f9ab00;
+}
+.risk-warning .risk-level {
+    color: #f9ab00;
+}
+
+.risk-danger {
+    border-left: 4px solid #ea4335;
+}
+.risk-danger .risk-level {
+    color: #ea4335;
+}
+
+/* ---------- Tables ---------- */
+.data-table, .score-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.data-table th, .score-table th {
+    background: #f8f9fa;
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 2px solid #e0e0e0;
+    font-weight: 600;
+    color: #555;
+}
+
+.data-table td, .score-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.data-table tr:hover, .score-table tr:hover {
+    background: #f8f9ff;
+}
+
+.total-row {
+    background: #e8f0fe;
+    font-weight: bold;
+}
+
+/* ---------- Forms ---------- */
+.record-form {
+    max-width: 600px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #444;
+    font-size: 0.9rem;
+}
+
+.form-group small {
+    display: block;
+    color: #888;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+.required {
+    color: #ea4335;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="file"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26,115,232,0.12);
+}
+
+/* ---------- Radio Group ---------- */
+.radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+}
+
+.radio-label:hover {
+    background: #f0f5ff;
+}
+
+.radio-label input[type="radio"] {
+    width: auto;
+    accent-color: #1a73e8;
+}
+
+.radio-label small {
+    color: #888;
+    margin: 0;
+    display: inline;
+}
+
+/* ---------- Buttons ---------- */
+.btn-primary {
+    display: inline-block;
+    background: #1a73e8;
+    color: white;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: #1557b0;
+}
+
+.btn-secondary {
+    display: inline-block;
+    background: #f0f0f0;
+    color: #555;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+.btn-small {
+    display: inline-block;
+    background: #e8f0fe;
+    color: #1a73e8;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.btn-small:hover {
+    background: #d2e3fc;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+/* ---------- Flash Messages ---------- */
+.flash-messages {
+    margin-bottom: 16px;
+}
+
+.flash {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.flash-success {
+    background: #e6f4ea;
+    color: #1e7e34;
+    border: 1px solid #c3e6cb;
+}
+
+.flash-error {
+    background: #fce8e6;
+    color: #c5221f;
+    border: 1px solid #f5c6cb;
+}
+
+/* ---------- Video ---------- */
+.video-item {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.video-info {
+    margin-bottom: 8px;
+}
+
+.video-preview video {
+    border-radius: 6px;
+    background: #000;
+}
+
+.video-list {
+    list-style: none;
+    margin-top: 12px;
+}
+
+.video-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-未解析 {
+    background: #fef7e0;
+    color: #a18800;
+}
+
+.status-解析済み {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+
+.status-失敗 {
+    background: #fce8e6;
+    color: #c5221f;
+}
+
+/* ---------- Misc ---------- */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+}
+
+.empty-state p {
+    margin-bottom: 16px;
+}
+
+.muted {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.analysis-result pre {
+    background: #f5f5f5;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    overflow-x: auto;
+}
+
+.inline-form {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.inline-form .form-group {
+    margin-bottom: 0;
+}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>📊 ダッシュボード</h2>
+
+    <!-- Today's Score Summary -->
+    <div class="card-row">
+        <div class="card main-score">
+            <h3>本日の疲労スコア</h3>
+            {% if has_record and today_record %}
+                <div class="score-value">{{ today_record.daily_fatigue_score }}</div>
+                <p class="card-sub">{{ today_record.menu_name }} ×{{ today_record.menu_count }}本</p>
+            {% else %}
+                <div class="score-value muted">-</div>
+                <p class="card-sub">未入力</p>
+            {% endif %}
+        </div>
+
+        <div class="card weekly-score">
+            <h3>週間疲労スコア（直近7日）</h3>
+            <div class="score-value">{{ weekly_score }}</div>
+        </div>
+
+        <div class="card risk-card {{ risk_style }}">
+            <h3>リスク判定</h3>
+            <div class="risk-level">{{ risk_level }}</div>
+            {% if risk_level == '危険' %}
+                <p class="card-sub">⚠️ 練習量の調整を推奨します</p>
+            {% elif risk_level == '注意' %}
+                <p class="card-sub">⚡ 疲労が蓄積しています</p>
+            {% else %}
+                <p class="card-sub">✅ 安全な範囲です</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Today's Score Breakdown -->
+    {% if has_record and today_record %}
+    <div class="card">
+        <h3>本日のスコア内訳</h3>
+        <table class="score-table">
+            <thead>
+                <tr>
+                    <th>項目</th>
+                    <th>値</th>
+                    <th>スコア</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>練習強度</td>
+                    <td>{{ today_record.menu_name }} ×{{ today_record.menu_count }}本</td>
+                    <td>{{ today_record.training_score }}</td>
+                </tr>
+                <tr>
+                    <td>睡眠スコア</td>
+                    <td>{{ today_record.sleep_hours }}時間</td>
+                    <td>{{ today_record.sleep_score }}</td>
+                </tr>
+                <tr>
+                    <td>主観的疲労度</td>
+                    <td>{{ today_record.subjective_fatigue }} / 5</td>
+                    <td>{{ today_record.fatigue_score_self }}</td>
+                </tr>
+                <tr>
+                    <td>気温スコア</td>
+                    <td>{{ today_record.temperature }}℃</td>
+                    <td>{{ today_record.temperature_score }}</td>
+                </tr>
+                <tr>
+                    <td>走行スコア</td>
+                    <td>-</td>
+                    <td>{{ today_record.running_score }} (未実装)</td>
+                </tr>
+                <tr class="total-row">
+                    <td><strong>合計</strong></td>
+                    <td></td>
+                    <td><strong>{{ today_record.daily_fatigue_score }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Recent Records -->
+    <div class="card">
+        <h3>直近の記録</h3>
+        {% if latest_records %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>日付</th>
+                        <th>練習メニュー</th>
+                        <th>本数</th>
+                        <th>睡眠</th>
+                        <th>疲労度</th>
+                        <th>スコア</th>
+                        <th>詳細</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in latest_records %}
+                    <tr>
+                        <td>{{ r.record_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ r.menu_name }}</td>
+                        <td>{{ r.menu_count }}</td>
+                        <td>{{ r.sleep_hours }}h</td>
+                        <td>{{ r.subjective_fatigue }}/5</td>
+                        <td>{{ r.daily_fatigue_score }}</td>
+                        <td><a href="{{ url_for('records.record_detail', record_id=r.id) }}" class="btn-small">詳細</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>まだ記録がありません。「記録入力」から入力してください。</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

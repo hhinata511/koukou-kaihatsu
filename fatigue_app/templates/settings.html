@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>⚙️ 設定</h2>
+
+    <form method="POST" action="{{ url_for('settings.settings_page') }}" class="record-form">
+        <div class="card">
+            <h3>睡眠設定</h3>
+            <div class="form-group">
+                <label for="average_sleep">平均睡眠時間（時間）</label>
+                <input type="number" id="average_sleep" name="average_sleep"
+                       value="{{ user.average_sleep }}" min="0" max="24" step="0.1">
+                <small>睡眠スコアの計算に使用されます。実際の睡眠時間が平均より少ないほど疲労スコアが加算されます。</small>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>リスク判定閾値</h3>
+            <p class="card-sub">週間疲労スコアに基づくリスク判定の閾値を設定します。</p>
+            <div class="form-group">
+                <label for="safe_threshold">安全閾値</label>
+                <input type="number" id="safe_threshold" name="safe_threshold"
+                       value="{{ setting.weekly_safe_threshold }}" step="0.1">
+                <small>週間スコアがこの値以下なら「安全」と判定されます。</small>
+            </div>
+            <div class="form-group">
+                <label for="warning_threshold">注意閾値</label>
+                <input type="number" id="warning_threshold" name="warning_threshold"
+                       value="{{ setting.weekly_warning_threshold }}" step="0.1">
+                <small>週間スコアが安全閾値を超え、危険閾値未満の場合「注意」と判定されます。</small>
+            </div>
+            <div class="form-group">
+                <label for="danger_threshold">危険閾値</label>
+                <input type="number" id="danger_threshold" name="danger_threshold"
+                       value="{{ setting.weekly_danger_threshold }}" step="0.1">
+                <small>週間スコアがこの値以上で「危険」と判定されます。</small>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">設定を保存</button>
+            <a href="{{ url_for('main.index') }}" class="btn-secondary">キャンセル</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
