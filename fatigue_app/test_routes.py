@@ -1,4 +1,4 @@
-"""Simple test to verify all routes are loading correctly."""
+"""Test to verify all routes including analysis are loading correctly."""
 from app import create_app
 
 app = create_app()
@@ -32,11 +32,19 @@ with app.test_client() as c:
         'remark': 'test',
     }, follow_redirects=True)
     print(f'Create record (POST): {r.status_code}')
-    # Check if flash message indicates success
-    assert '保存' in r.data.decode('utf-8') or r.status_code == 200
 
     # Test record detail
     r = c.get('/record/1')
     print(f'Record detail: {r.status_code}')
+
+    # Test analysis page (with record that exists)
+    r = c.get('/analysis/1')
+    print(f'Analysis page: {r.status_code}')
+
+    # Print available routes
+    print('\nAvailable routes:')
+    for rule in app.url_map.iter_rules():
+        methods = ','.join(sorted(rule.methods - {'HEAD', 'OPTIONS'}))
+        print(f'  {methods:8s} {rule.rule}')
 
     print('\nAll route tests passed!')

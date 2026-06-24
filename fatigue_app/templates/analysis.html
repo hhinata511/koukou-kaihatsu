@@ -4,58 +4,212 @@
 <div class="container">
     <h2>🔬 動作解析</h2>
 
+    <!-- Record Summary -->
     <div class="card">
-        <h3>{{ record.record_date.strftime('%Y年%m月%d日') }} - {{ record.menu_name }}</h3>
-        <p>日次疲労スコア: {{ record.daily_fatigue_score }}</p>
+        <div class="detail-header">
+            <div>
+                <h3>{{ record.record_date.strftime('%Y年%m月%d日') }} - {{ record.menu_name }}</h3>
+                <p>日次疲労スコア: <strong>{{ record.daily_fatigue_score }}</strong>（走行スコア: {{ record.running_score }}）</p>
+            </div>
+        </div>
     </div>
 
     {% if videos %}
+        {% for v in videos %}
         <div class="card">
-            <h3>アップロード済み動画</h3>
-            {% for v in videos %}
-            <div class="video-item">
-                <div class="video-info">
-                    <strong>{{ v.video_type }}</strong>
-                    <p>ファイル: {{ v.file_path }}</p>
-                    <p>解析状態: <span class="status-badge status-{{ v.analysis_status }}">{{ v.analysis_status }}</span></p>
+            <div class="video-header">
+                <h3>
+                    {% if v.video_type == 'running' %}🏃 走行映像
+                    {% elif v.video_type == 'jump' %}🦘 垂直ジャンプ
+                    {% else %}🎥 動画{% endif %}
+                </h3>
+                <div class="video-actions">
+                    <span class="status-badge status-{{ v.analysis_status }}">{{ v.analysis_status }}</span>
+                    {% if v.analysis_status == '未解析' %}
+                    <form method="POST" action="{{ url_for('analysis.video_analyze', video_id=v.id) }}" style="display:inline;">
+                        <button type="submit" class="btn-primary btn-small">🔍 解析実行</button>
+                    </form>
+                    {% elif v.analysis_status == '失敗' %}
+                    <form method="POST" action="{{ url_for('analysis.video_analyze', video_id=v.id) }}" style="display:inline;">
+                        <button type="submit" class="btn-secondary btn-small">🔄 再解析</button>
+                    </form>
+                    {% endif %}
                 </div>
-                <div class="video-preview">
-                    <video controls width="100%">
-                        <source src="{{ url_for('static', filename=v.file_path) }}" type="video/mp4">
-                        お使いのブラウザは動画再生に対応していません。
-                    </video>
-                </div>
-
-                {% if v.analysis_status == '解析済み' and v.analysis_result_json %}
-                <div class="analysis-result">
-                    <h4>解析結果</h4>
-                    <pre>{{ v.analysis_result_json }}</pre>
-                </div>
-                {% elif v.analysis_status == '未解析' %}
-                <p class="muted">この動画はまだ解析されていません。走行解析機能は今後のアップデートで追加予定です。</p>
-                {% endif %}
             </div>
-            {% endfor %}
+
+            <!-- Video Player -->
+            <div class="video-preview">
+                <video controls width="100%" preload="metadata">
+                    <source src="{{ url_for('static', filename=v.file_path) }}" type="video/mp4">
+                    お使いのブラウザは動画再生に対応していません。
+                </video>
+            </div>
+
+            <!-- Analysis Results -->
+            {% if v.analysis_status == '解析済み' and v.analysis %}
+            {% set a = v.analysis %}
+
+            <!-- Error message if any -->
+            {% if a.error %}
+            <div class="flash flash-warning" style="margin-top: 12px;">
+                ⚠️ {{ a.error }}
+            </div>
+            {% endif %}
+
+            <!-- Key Metrics Cards -->
+            <div class="metrics-grid" style="margin-top: 16px;">
+                <div class="metric-card">
+                    <div class="metric-label">ストライド</div>
+                    <div class="metric-value">{{ a.stride_m if a.stride_m else '-' }} <small>m</small></div>
+                    {% if a.stride_change_pct %}
+                    <div class="metric-change {% if a.stride_change_pct > 5 %}negative{% else %}positive{% endif %}">
+                        {{ '+' if a.stride_change_pct > 0 else '' }}{{ a.stride_change_pct }}% （基準比）
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">ピッチ</div>
+                    <div class="metric-value">{{ a.pitch_steps_per_sec if a.pitch_steps_per_sec else '-' }} <small>steps/s</small></div>
+                    {% if a.pitch_change_pct %}
+                    <div class="metric-change {% if a.pitch_change_pct > 10 %}negative{% else %}positive{% endif %}">
+                        {{ '+' if a.pitch_change_pct > 0 else '' }}{{ a.pitch_change_pct }}% （基準比）
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">股関節角度</div>
+                    <div class="metric-value">{{ a.hip_angle_deg if a.hip_angle_deg else '-' }} <small>°</small></div>
+                    {% if a.hip_angle_change_pct %}
+                    <div class="metric-change {% if a.hip_angle_change_pct > 5 %}negative{% else %}positive{% endif %}">
+                        {{ '+' if a.hip_angle_change_pct > 0 else '' }}{{ a.hip_angle_change_pct }}% （基準比）
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">膝関節角度</div>
+                    <div class="metric-value">{{ a.knee_angle_deg if a.knee_angle_deg else '-' }} <small>°</small></div>
+                    {% if a.knee_angle_change_pct %}
+                    <div class="metric-change {% if a.knee_angle_change_pct > 5 %}negative{% else %}positive{% endif %}">
+                        {{ '+' if a.knee_angle_change_pct > 0 else '' }}{{ a.knee_angle_change_pct }}% （基準比）
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">接地時間</div>
+                    <div class="metric-value">{{ a.ground_contact_time_ms if a.ground_contact_time_ms else '-' }} <small>ms</small></div>
+                    {% if a.contact_ratio is not none %}
+                    <div class="metric-change">接地率: {{ (a.contact_ratio * 100)|round(1) }}%</div>
+                    {% endif %}
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">骨盤上下動</div>
+                    <div class="metric-value">{{ a.pelvic_oscillation_px if a.pelvic_oscillation_px else '-' }} <small>px</small></div>
+                </div>
+            </div>
+
+            <!-- Running Score -->
+            {% if a.running_score is not none %}
+            <div class="running-score-box" style="margin-top: 16px;">
+                <div class="running-score-label">走行スコア</div>
+                <div class="running-score-value">{{ a.running_score }}</div>
+                <div class="running-score-detail">
+                    ストライド {{ a.stride_change_pct }}% + ピッチ {{ a.pitch_change_pct }}% + 股関節 {{ a.hip_angle_change_pct }}% + 膝 {{ a.knee_angle_change_pct }}%
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Detailed Table -->
+            {% if a.processed_frames %}
+            <details style="margin-top: 16px;">
+                <summary style="cursor: pointer; color: #1a73e8; font-weight: 600;">📊 詳細データ</summary>
+                <table class="data-table" style="margin-top: 8px;">
+                    <tr><th>項目</th><th>値</th></tr>
+                    <tr><td>フレームレート</td><td>{{ a.fps }} fps</td></tr>
+                    <tr><td>総フレーム数</td><td>{{ a.frame_count }}</td></tr>
+                    <tr><td>動画時間</td><td>{{ a.duration_sec }} 秒</td></tr>
+                    <tr><td>解析フレーム数</td><td>{{ a.processed_frames }}</td></tr>
+                    <tr><td>推定歩数</td><td>{{ a.estimated_steps }}</td></tr>
+                    <tr><td>接地時間</td><td>{{ a.ground_contact_time_ms }} ms</td></tr>
+                    <tr><td>接地率</td><td>{{ (a.contact_ratio * 100)|round(1) if a.contact_ratio else '-' }}%</td></tr>
+                </table>
+            </details>
+            {% endif %}
+
+            <!-- Raw JSON for debugging -->
+            <!-- <details style="margin-top: 8px;">
+                <summary style="cursor: pointer; color: #888;">JSON</summary>
+                <pre style="font-size: 0.75rem; max-height: 200px; overflow-y: auto;">{{ a | tojson(indent=2) }}</pre>
+            </details> -->
+
+            {% elif v.analysis_status == '未解析' %}
+            <div class="empty-state-small">
+                <p>この動画はまだ解析されていません。「解析実行」ボタンをクリックして解析を開始してください。</p>
+                <p class="muted">※ 解析には数秒〜数十秒かかる場合があります。</p>
+            </div>
+            {% elif v.analysis_status == '失敗' %}
+            <div class="flash flash-error" style="margin-top: 12px;">
+                ❌ 解析に失敗しました。動画の形式・画角を確認し、再解析をお試しください。
+            </div>
+            {% elif v.analysis_status == '解析中' %}
+            <div class="empty-state-small">
+                <p>⏳ 解析を実行中です。しばらくお待ちください...</p>
+            </div>
+            {% endif %}
         </div>
+        {% endfor %}
     {% else %}
         <div class="card">
             <h3>動画</h3>
             <p>アップロードされた動画はありません。記録詳細画面から動画をアップロードしてください。</p>
+            <a href="{{ url_for('records.record_detail', record_id=record.id) }}" class="btn-primary">記録詳細へ →</a>
         </div>
     {% endif %}
 
+    <!-- Analysis Explanation -->
     <div class="card">
-        <h3>動作解析について</h3>
-        <p>本システムでは将来的に以下の指標を動画から自動抽出する予定です：</p>
-        <ul>
-            <li>ストライド</li>
-            <li>ピッチ</li>
-            <li>股関節角度</li>
-            <li>膝関節角度</li>
-            <li>接地時間</li>
-            <li>骨盤の上下動</li>
-        </ul>
-        <p class="muted">※ MVP（現在のバージョン）では動画アップロードのみ対応しており、自動解析は未実装です。</p>
+        <h3>解析指標の見方</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>指標</th>
+                    <th>基準値（短距離選手標準）</th>
+                    <th>疲労時の変化</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>ストライド</td>
+                    <td>約 2.2 m</td>
+                    <td>低下（股関節可動域低下・出力減）</td>
+                </tr>
+                <tr>
+                    <td>ピッチ</td>
+                    <td>約 4.0 steps/s</td>
+                    <td>低下 または 不安定化</td>
+                </tr>
+                <tr>
+                    <td>股関節角度</td>
+                    <td>約 160°</td>
+                    <td>減少（腿が上がらない）</td>
+                </tr>
+                <tr>
+                    <td>膝関節角度</td>
+                    <td>約 150°</td>
+                    <td>減少（伸展不十分）または過伸展</td>
+                </tr>
+                <tr>
+                    <td>接地時間</td>
+                    <td>約 100〜130 ms</td>
+                    <td>延長（反発力低下）</td>
+                </tr>
+                <tr>
+                    <td>骨盤上下動</td>
+                    <td>小さいほど安定</td>
+                    <td>増大（体幹安定性低下）</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="muted" style="margin-top: 8px;">※ 走行スコアは各指標の基準値からの変化率（%）の合計です。スコアが大きいほど疲労によるフォーム変化が顕著であることを示します。</p>
     </div>
 
     <div class="form-actions">
@@ -63,4 +217,100 @@
         <a href="{{ url_for('main.index') }}" class="btn-secondary">トップに戻る</a>
     </div>
 </div>
+
+<style>
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+    }
+    .metric-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 14px;
+        text-align: center;
+    }
+    .metric-label {
+        font-size: 0.8rem;
+        color: #888;
+        margin-bottom: 4px;
+    }
+    .metric-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+    }
+    .metric-value small {
+        font-size: 0.8rem;
+        font-weight: 400;
+        color: #888;
+    }
+    .metric-change {
+        font-size: 0.8rem;
+        margin-top: 4px;
+        font-weight: 600;
+    }
+    .metric-change.negative {
+        color: #ea4335;
+    }
+    .metric-change.positive {
+        color: #34a853;
+    }
+    .running-score-box {
+        background: linear-gradient(135deg, #e8f0fe, #f0f5ff);
+        border: 2px solid #1a73e8;
+        border-radius: 10px;
+        padding: 16px;
+        text-align: center;
+    }
+    .running-score-label {
+        font-size: 0.9rem;
+        color: #555;
+    }
+    .running-score-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1a73e8;
+    }
+    .running-score-detail {
+        font-size: 0.8rem;
+        color: #888;
+        margin-top: 4px;
+    }
+    .video-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    .video-header h3 {
+        margin-bottom: 0;
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .video-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .empty-state-small {
+        text-align: center;
+        padding: 20px;
+        color: #888;
+    }
+    .flash-warning {
+        background: #fef7e0;
+        color: #a18800;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+    details summary {
+        list-style: none;
+    }
+    details summary::-webkit-details-marker {
+        display: none;
+    }
+</style>
 {% endblock %}
